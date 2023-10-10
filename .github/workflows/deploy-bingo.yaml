@@ -1,0 +1,26 @@
+name: deploy-bingo
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "bingo/**"
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::153964124765:role/aws-react-bingo-github-action
+          aws-region: us-east-1
+
+      - name: Deploy to S3
+        run: |
+          aws s3 sync ./public/ s3://miji.com.au/
