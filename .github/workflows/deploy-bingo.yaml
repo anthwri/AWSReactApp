@@ -23,15 +23,16 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
       - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@v2
         with:
           role-to-assume: arn:aws:iam::153964124765:role/bingo-githubaction-access
-          role-session-name: bingo-session
-          role-duration-seconds: 1200
+          role-session-name: GithubActionsSession
           aws-region: ${{ env.AWS_REGION }}
-      - name: Sts GetCallerIdentity
-        run: |
-          aws sts get-caller-identity
+
       - name: Deploy to S3
         run: |
           aws s3 sync ./public/ s3://${{ env.BUCKET_NAME }}/ --delete
+
+      - name: CF cache invalidation
+        run: |
+          aws cloudfront create-invalidation --distribution-id EVK66PZ9SH73U --paths '/*'
