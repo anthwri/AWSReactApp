@@ -9,6 +9,7 @@ on:
 
 env:
   AWS_REGION: "us-east-1"
+  BUCKET_NAME: "miji.com.au"
 
 # Permission can be added at job level or workflow level
 permissions:
@@ -24,7 +25,8 @@ jobs:
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: arn:aws:iam::153964124765:role/aws-react-bingo-github-action
+          role-to-assume: arn:aws:iam::153964124765:role/bingo-githubaction-access
+          role-session-name: bingo-session
           role-duration-seconds: 1200
           aws-region: ${{ env.AWS_REGION }}
       - name: Sts GetCallerIdentity
@@ -32,4 +34,4 @@ jobs:
           aws sts get-caller-identity
       - name: Deploy to S3
         run: |
-          aws s3 sync ./public/ s3://miji.com.au/ --delete
+          aws s3 sync ./public/ s3://${{ env.BUCKET_NAME }}/ --delete
