@@ -1,37 +1,19 @@
-name: deploy-bingo
+name: deploy bingo
 
-# Controls when the action will run. Invokes the workflow on push events but only for the main branch
 on:
   push:
-    branches: [main]
+    branches: ["main"]
   pull_request:
-    branches: [main]
-
-env:
-  AWS_REGION: "us-east-1"
-  BUCKET_NAME: "miji.com.au"
-
-# Permission can be added at job level or workflow level
-permissions:
-  id-token: write # This is required for requesting the JWT
-  contents: read # This is required for actions/checkout
+    branches: ["main"]
 
 jobs:
-  AssumeRoleAndCallIdentity:
+  build:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
-      #- name: Configure AWS Credentials
-      #  uses: aws-actions/configure-aws-credentials@v4
-      #  with:
-      #    role-to-assume: arn:aws:iam::153964124765:role/bingo-githubaction-access
-      #    role-session-name: GithubActionsSession
-      #    aws-region: ${{ env.AWS_REGION }}
+        uses: actions/checkout@v2
 
-      #- name: Deploy to S3
-      #  run: |
-      #    aws s3 sync ./public/ s3://${{ env.BUCKET_NAME }}/ --delete
       - name: Set up Node.js
         uses: actions/setup-node@v2
         with:
@@ -48,11 +30,7 @@ jobs:
         with:
           args: --acl public-read
         env:
-          SOURCE_DIR: build/
+          SOURCE_DIR: bingo/build/
           AWS_S3_BUCKET: ${{ secrets.AWS_S3_BUCKET }}
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-
-      - name: CF cache invalidation
-        run: |
-          aws cloudfront create-invalidation --distribution-id ${{ secrets.AWS_CLOUDFRONT_DISTRIBUTION_ID }} --paths '/*'
